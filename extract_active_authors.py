@@ -62,6 +62,9 @@ def main():
                 results.append((name, time_period))
                 distinct_authors.add(name)
 
+    # 按人名排序（同名记录会排在一起），再按时间段排序保证输出稳定
+    results.sort(key=lambda item: (item[0], item[1]))
+
     # 写入结果CSV
     with open(output_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
