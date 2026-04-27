@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import re
 from pathlib import Path
 
@@ -20,6 +21,7 @@ US_STATE_CODES = {
     "DC",
 }
 
+STATIC_IMAGE_FORMAT = "png"
 COUNTRY_ALIASES = {
     "USA": "United States",
     "U S A": "United States",
@@ -179,10 +181,70 @@ def make_blue_palette(bin_count: int) -> list[str]:
     return px.colors.sample_colorscale("Blues", [0.35 + 0.6 * i / max(bin_count - 1, 1) for i in range(bin_count)])
 
 
-def save_year_map(counts: pd.DataFrame, year: int, output_dir: Path) -> Path:
+def format_count_value(value: float) -> str:
+    return str(int(value)) if float(value).is_integer() else str(value)
+
+
+def format_count_range(interval: pd.Interval) -> str:
+    lower = max(1, math.ceil(float(interval.left)))
+    upper = max(lower, math.floor(float(interval.right)))
+    if lower == upper:
+        return str(lower)
+    return f"{lower}-{upper}"
+
+
+def build_discrete_color_bins(counts: pd.DataFrame) -> pd.DataFrame:
+    if counts.empty:
+        return counts.assign(color_bin=pd.Series(dtype="object"))
+
+    binned = counts.copy()
+    positive = binned[binned["people_count"] > 0].copy()
+    if positive.empty:
+        binned["color_bin"] = pd.NA
+        return binned
+
+    bin_count = min(5, positive["people_count"].nunique())
+    if bin_count <= 1:
+        binned["color_bin"] = f"{int(positive['people_count'].iloc[0])}"
+        return binned
+
+    categories = pd.qcut(positive["people_count"], q=bin_count, duplicates="drop")
+    label_map = {interval: format_count_range(interval) for interval in categories.cat.categories}
+    binned["color_bin"] = pd.NA
+    binned.loc[positive.index, "color_bin"] = categories.map(label_map)
+    return binned
+
+
+def export_static_image(figure: go.Figure, image_path: Path) -> None:
+    try:
+        figure.write_image(
+            str(image_path),
+            format=image_path.suffix.lstrip("."),
+            width=1400,
+            height=780,
+            scale=2,
+        )
+    except ValueError as exc:
+        message = str(exc).lower()
+        if "kaleido" in message:
+            raise RuntimeError(
+                "Static image export requires kaleido. Install it with `pip install kaleido` "
+                "or `conda install -c conda-forge kaleido`, then rerun the script."
+            ) from exc
+        raise
+
+
+def save_year_map(
+    counts: pd.DataFrame,
+    year: int,
+    output_dir: Path,
+    image_format: str,
+    export_image: bool,
+) -> tuple[Path, Path | None]:
     output_dir.mkdir(parents=True, exist_ok=True)
     html_path = output_dir / f"author_distribution_{year}.html"
-    label_font_size = 9 if year == 2024 else 11
+    image_path = output_dir / f"author_distribution_{year}.{image_format}"
+    label_font_size = 10
 
     binned = build_discrete_color_bins(counts)
     positive = binned[binned["people_count"] > 0].copy()
@@ -210,20 +272,50 @@ def save_year_map(counts: pd.DataFrame, year: int, output_dir: Path) -> Path:
                     hovertemplate="Country/region: %{location}<br>People: %{z}<extra></extra>",
                 )
             )
-
-        figure.add_trace(
-            go.Scattergeo(
-                locations=positive["country"],
-                locationmode="country names",
-                text=positive["people_count"].astype(str),
-                mode="markers+text",
-                marker=dict(size=6, color="#163f7a", opacity=0.9),
-                textposition="top center",
-                textfont=dict(size=label_font_size, color="#1f1f1f"),
-                showlegend=False,
-                hoverinfo="skip",
+            figure.add_trace(
+                go.Scattergeo(
+                    lon=[0],
+                    lat=[0],
+                    mode="markers",
+                    marker=dict(size=10, color=color, symbol="square"),
+                    name=label,
+                    showlegend=True,
+                    hoverinfo="skip",
+                    visible="legendonly",
+                )
             )
-        )
+
+        darkest_bin_label = bin_labels[-1] if bin_labels else None
+        non_dark_rows = positive if darkest_bin_label is None else positive[positive["color_bin"] != darkest_bin_label]
+        dark_rows = positive[positive["color_bin"] == darkest_bin_label] if darkest_bin_label is not None else positive.iloc[0:0]
+
+        if not non_dark_rows.empty:
+            figure.add_trace(
+                go.Scattergeo(
+                    locations=non_dark_rows["country"],
+                    locationmode="country names",
+                    text=non_dark_rows["people_count"].astype(str),
+                    mode="text",
+                    textposition="middle center",
+                    textfont=dict(size=label_font_size, color="#1f1f1f"),
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
+
+        if not dark_rows.empty:
+            figure.add_trace(
+                go.Scattergeo(
+                    locations=dark_rows["country"],
+                    locationmode="country names",
+                    text=dark_rows["people_count"].astype(str),
+                    mode="text",
+                    textposition="middle center",
+                    textfont=dict(size=label_font_size, color="#ffffff"),
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
 
     figure.update_layout(
         title=f"Author distribution in {year}",
@@ -236,11 +328,23 @@ def save_year_map(counts: pd.DataFrame, year: int, output_dir: Path) -> Path:
             countrycolor="white",
             projection_type="natural earth",
         ),
-        legend_title_text="People count range",
-        margin=dict(l=0, r=0, t=60, b=0),
+        legend=dict(
+            x=0.88,
+            y=0.02,
+            xanchor="right",
+            yanchor="bottom",
+            bgcolor="rgba(255,255,255,0.82)",
+            bordercolor="#d0d0d0",
+            borderwidth=1,
+            font=dict(size=11),
+        ),
+        margin=dict(l=0, r=10, t=70, b=0),
     )
     figure.write_html(str(html_path), include_plotlyjs="cdn", full_html=True)
-    return html_path
+    if export_image:
+        export_static_image(figure, image_path)
+        return html_path, image_path
+    return html_path, None
 
 
 def save_summary_csv(yearly_counts: dict[int, pd.DataFrame], output_dir: Path) -> Path:
@@ -271,6 +375,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input", default="chinesename_address_year.csv", help="Input CSV path.")
     parser.add_argument("--output-dir", default="author_maps", help="Output directory for HTML maps.")
     parser.add_argument(
+        "--image-format",
+        default=STATIC_IMAGE_FORMAT,
+        choices=["png", "jpg", "jpeg"],
+        help="Static image format to export alongside the HTML map.",
+    )
+    parser.add_argument(
+        "--skip-static-image",
+        action="store_true",
+        help="Only write the HTML map and skip writing a static PNG/JPG file.",
+    )
+    parser.add_argument(
         "--years",
         nargs="*",
         type=int,
@@ -292,8 +407,16 @@ def main() -> None:
     migration_path, distinct_authors = save_migration_csv(df, input_path.parent)
 
     for year in args.years:
-        map_path = save_year_map(yearly_counts[year], year, output_dir)
-        print(f"Year {year}: {len(yearly_counts[year])} countries/regions -> {map_path}")
+        html_path, image_path = save_year_map(
+            yearly_counts[year],
+            year,
+            output_dir,
+            args.image_format,
+            not args.skip_static_image,
+        )
+        print(f"Year {year}: {len(yearly_counts[year])} countries/regions -> {html_path}")
+        if image_path is not None:
+            print(f"Year {year}: static image -> {image_path}")
 
     print(f"Summary CSV written to {summary_path}")
     print(f"Migration CSV written to {migration_path}")
