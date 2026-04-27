@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import math
 import re
 from pathlib import Path
@@ -11,6 +10,8 @@ import plotly.express as px
 
 
 TARGET_YEARS = [1991, 2000, 2010, 2020, 2024]
+DEFAULT_INPUT_FILE = "chinesename_address_year.csv"
+DEFAULT_OUTPUT_DIR = "author_maps"
 
 US_STATE_CODES = {
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -156,33 +157,8 @@ def build_migration_records(df: pd.DataFrame) -> pd.DataFrame:
     return migration_frame[["name", "country", "year"]]
 
 
-def build_discrete_color_bins(counts: pd.DataFrame) -> pd.DataFrame:
-    if counts.empty:
-        return counts.assign(color_bin=pd.Series(dtype="object"))
-
-    binned = counts.copy()
-    positive = binned[binned["people_count"] > 0].copy()
-    if positive.empty:
-        binned["color_bin"] = pd.NA
-        return binned
-
-    bin_count = min(5, positive["people_count"].nunique())
-    if bin_count <= 1:
-        binned["color_bin"] = f"{int(positive['people_count'].iloc[0])}"
-        return binned
-
-    categories = pd.qcut(positive["people_count"], q=bin_count, duplicates="drop")
-    binned["color_bin"] = pd.NA
-    binned.loc[positive.index, "color_bin"] = categories.astype(str)
-    return binned
-
-
 def make_blue_palette(bin_count: int) -> list[str]:
     return px.colors.sample_colorscale("Blues", [0.35 + 0.6 * i / max(bin_count - 1, 1) for i in range(bin_count)])
-
-
-def format_count_value(value: float) -> str:
-    return str(int(value)) if float(value).is_integer() else str(value)
 
 
 def format_count_range(interval: pd.Interval) -> str:
@@ -368,59 +344,31 @@ def save_migration_csv(df: pd.DataFrame, output_root: Path) -> tuple[Path, int]:
     return migration_path, distinct_authors
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Analyze author locations by year and draw world maps for each target year."
-    )
-    parser.add_argument("--input", default="chinesename_address_year.csv", help="Input CSV path.")
-    parser.add_argument("--output-dir", default="author_maps", help="Output directory for HTML maps.")
-    parser.add_argument(
-        "--image-format",
-        default=STATIC_IMAGE_FORMAT,
-        choices=["png", "jpg", "jpeg"],
-        help="Static image format to export alongside the HTML map.",
-    )
-    parser.add_argument(
-        "--skip-static-image",
-        action="store_true",
-        help="Only write the HTML map and skip writing a static PNG/JPG file.",
-    )
-    parser.add_argument(
-        "--years",
-        nargs="*",
-        type=int,
-        default=TARGET_YEARS,
-        help="Years to analyze. Default: 1991 2000 2010 2020 2024.",
-    )
-    return parser.parse_args()
-
-
 def main() -> None:
-    args = parse_args()
-    input_path = Path(args.input)
-    output_dir = Path(args.output_dir)
+    input_path = Path(DEFAULT_INPUT_FILE)
+    output_dir = Path(DEFAULT_OUTPUT_DIR)
     df = load_data(input_path)
     print_name_address_summary(df)
 
-    yearly_counts = build_yearly_country_counts(df, args.years)
+    yearly_counts = build_yearly_country_counts(df, TARGET_YEARS)
     summary_path = save_summary_csv(yearly_counts, output_dir)
     migration_path, distinct_authors = save_migration_csv(df, input_path.parent)
+    print(f"Summary CSV written to {summary_path}", flush=True)
+    print(f"Migration CSV written to {migration_path}", flush=True)
+    print(f"Migration distinct authors: {distinct_authors}", flush=True)
 
-    for year in args.years:
+    for year in TARGET_YEARS:
+        print(f"Rendering year {year} map...", flush=True)
         html_path, image_path = save_year_map(
             yearly_counts[year],
             year,
             output_dir,
-            args.image_format,
-            not args.skip_static_image,
+            STATIC_IMAGE_FORMAT,
+            False,
         )
         print(f"Year {year}: {len(yearly_counts[year])} countries/regions -> {html_path}")
         if image_path is not None:
             print(f"Year {year}: static image -> {image_path}")
-
-    print(f"Summary CSV written to {summary_path}")
-    print(f"Migration CSV written to {migration_path}")
-    print(f"Migration distinct authors: {distinct_authors}")
 
 
 if __name__ == "__main__":
