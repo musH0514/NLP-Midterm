@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword WordCloud Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+        .section {
+            margin-bottom: 50px;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #4ECDC4;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .wordcloud-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .wordcloud-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .comparison-table th {
+            background-color: #4ECDC4;
+            color: white;
+        }
+        .comparison-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .top-keywords {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .top-keywords h3 {
+            color: #666;
+            margin-top: 0;
+        }
+        .summary {
+            background-color: #e8f4f8;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #4ECDC4;
+            margin-top: 40px;
+        }
+        .summary h2 {
+            margin-top: 0;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 200px;
+            margin: 10px;
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4ECDC4;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Keyword WordCloud Analysis</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number">93699</div>
+                <div class="label">All Papers Keywords</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">19869</div>
+                <div class="label">High Productive Authors Keywords</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">73830</div>
+                <div class="label">Low Productive Authors Keywords</div>
+            </div>
+        </div>
+        
+        <!-- All Papers WordCloud -->
+        <div class="section">
+            <h2>1. All Papers Keywords</h2>
+            <div class="wordcloud-container">
+                <img src="all_papers_wordcloud.png" alt="All Papers Keywords">
+            </div>
+            <div class="top-keywords">
+                <h3>Top 10 Keywords</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Keyword</th>
+                        <th>Frequency</th>
+                    </tr>
+                    <tr><td>higher education</td><td>768</td></tr>
+                    <tr><td>higher-education</td><td>567</td></tr>
+                    <tr><td>perceptions</td><td>507</td></tr>
+                    <tr><td>science</td><td>504</td></tr>
+                    <tr><td>achievement</td><td>438</td></tr>
+                    <tr><td>self-efficacy</td><td>403</td></tr>
+                    <tr><td>experiences</td><td>381</td></tr>
+                    <tr><td>gender</td><td>364</td></tr>
+                    <tr><td>engagement</td><td>359</td></tr>
+                    <tr><td>attitudes</td><td>358</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- High Productive Authors WordCloud -->
+        <div class="section">
+            <h2>2. High Productive Authors Papers Keywords</h2>
+            <div class="wordcloud-container">
+                <img src="high_productive_authors_wordcloud.png" alt="High Productive Authors Keywords">
+            </div>
+            <div class="top-keywords">
+                <h3>Top 10 Keywords</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Keyword</th>
+                        <th>Frequency</th>
+                    </tr>
+                    <tr><td>higher education</td><td>199</td></tr>
+                    <tr><td>higher-education</td><td>175</td></tr>
+                    <tr><td>achievement</td><td>143</td></tr>
+                    <tr><td>science</td><td>129</td></tr>
+                    <tr><td>perceptions</td><td>118</td></tr>
+                    <tr><td>experiences</td><td>108</td></tr>
+                    <tr><td>self-efficacy</td><td>103</td></tr>
+                    <tr><td>engagement</td><td>100</td></tr>
+                    <tr><td>gender</td><td>89</td></tr>
+                    <tr><td>beliefs</td><td>87</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Low Productive Authors WordCloud -->
+        <div class="section">
+            <h2>3. Low Productive Authors Papers Keywords</h2>
+            <div class="wordcloud-container">
+                <img src="low_productive_authors_wordcloud.png" alt="Low Productive Authors Keywords">
+            </div>
+            <div class="top-keywords">
+                <h3>Top 10 Keywords</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Keyword</th>
+                        <th>Frequency</th>
+                    </tr>
+                    <tr><td>higher education</td><td>569</td></tr>
+                    <tr><td>higher-education</td><td>392</td></tr>
+                    <tr><td>perceptions</td><td>389</td></tr>
+                    <tr><td>science</td><td>375</td></tr>
+                    <tr><td>self-efficacy</td><td>300</td></tr>
+                    <tr><td>attitudes</td><td>298</td></tr>
+                    <tr><td>achievement</td><td>295</td></tr>
+                    <tr><td>curriculum</td><td>292</td></tr>
+                    <tr><td>gender</td><td>275</td></tr>
+                    <tr><td>experiences</td><td>273</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Comparison Summary -->
+        <div class="summary">
+            <h2>4. Comparison Summary</h2>
+            <h3>Key Findings:</h3>
+            <ul>
+                <li>All papers cover a diverse range of research topics, as seen in the comprehensive keyword distribution.</li>
+                <li>High productive authors tend to focus on specific research areas, indicated by the concentration of certain keywords in their word cloud.</li>
+                <li>Low productive authors show a broader but less concentrated set of research interests.</li>
+            </ul>
+            
+            <h3>Top Keywords Comparison:</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Rank</th>
+                    <th>All Papers</th>
+                    <th>High Productive Authors</th>
+                    <th>Low Productive Authors</th>
+                </tr>
+                <tr><td>1</td><td>higher education<br><small>768</small></td><td>higher education<br><small>199</small></td><td>higher education<br><small>569</small></td></tr>
+                <tr><td>2</td><td>higher-education<br><small>567</small></td><td>higher-education<br><small>175</small></td><td>higher-education<br><small>392</small></td></tr>
+                <tr><td>3</td><td>perceptions<br><small>507</small></td><td>achievement<br><small>143</small></td><td>perceptions<br><small>389</small></td></tr>
+                <tr><td>4</td><td>science<br><small>504</small></td><td>science<br><small>129</small></td><td>science<br><small>375</small></td></tr>
+                <tr><td>5</td><td>achievement<br><small>438</small></td><td>perceptions<br><small>118</small></td><td>self-efficacy<br><small>300</small></td></tr>
+                <tr><td>6</td><td>self-efficacy<br><small>403</small></td><td>experiences<br><small>108</small></td><td>attitudes<br><small>298</small></td></tr>
+                <tr><td>7</td><td>experiences<br><small>381</small></td><td>self-efficacy<br><small>103</small></td><td>achievement<br><small>295</small></td></tr>
+                <tr><td>8</td><td>gender<br><small>364</small></td><td>engagement<br><small>100</small></td><td>curriculum<br><small>292</small></td></tr>
+                <tr><td>9</td><td>engagement<br><small>359</small></td><td>gender<br><small>89</small></td><td>gender<br><small>275</small></td></tr>
+                <tr><td>10</td><td>attitudes<br><small>358</small></td><td>beliefs<br><small>87</small></td><td>experiences<br><small>273</small></td></tr>
+            </table>
+            
+            <h3>Implication:</h3>
+            <p>The keyword analysis suggests that high productive authors tend to specialize in specific research areas, while low productive authors have more varied research interests. This specialization might contribute to their higher publication productivity. The overlapping keywords indicate common research interests across both groups, while the unique keywords highlight different research focuses.</p>
+        </div>
+    </div>
+</body>
+</html>

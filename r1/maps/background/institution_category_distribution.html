@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Institution Category Distribution of Scholars</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #4ECDC4;
+            padding-bottom: 10px;
+        }
+        .chart-container {
+            margin: 40px 0;
+            height: 400px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4ECDC4;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scholar Institution Category Distribution</h1>
+        
+        <h2>1. Main Institution Category Distribution</h2>
+        <div class="chart-container">
+            <canvas id="mainCategoryChart"></canvas>
+        </div>
+        
+        <h2>2. All Institution Category Distribution</h2>
+        <div class="chart-container">
+            <canvas id="allCategoryChart"></canvas>
+        </div>
+        
+        <h2>3. Institution Category Statistics</h2>
+        <table>
+            <tr>
+                <th>Institution Category</th>
+                <th>主要Institution CategoryNumber of Scholars</th>
+                <th>所有Institution CategoryNumber of Scholars</th>
+            </tr>
+            <tr><td>University</td><td>7763</td><td>8190</td></tr>
+            <tr><td>Other</td><td>557</td><td>1454</td></tr>
+            <tr><td>Medical Institution</td><td>40</td><td>419</td></tr>
+            <tr><td>Research Institution</td><td>29</td><td>359</td></tr>
+            <tr><td>Enterprise</td><td>18</td><td>98</td></tr>
+        </table>
+    </div>
+    
+    <script>
+        // 主要Institution Category饼图
+        const mainCtx = document.getElementById('mainCategoryChart').getContext('2d');
+        const mainCategoryChart = new Chart(mainCtx, {
+            type: 'pie',
+            data: {
+                labels: ["University", "Other", "Medical Institution", "Research Institution", "Enterprise"],
+                datasets: [{
+                    data: [7763, 557, 40, 29, 18],
+                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '学者主要Institution Category分布',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 所有Institution Category柱状图
+        const allCtx = document.getElementById('allCategoryChart').getContext('2d');
+        const allCategoryChart = new Chart(allCtx, {
+            type: 'bar',
+            data: {
+                labels: ["University", "Other", "Medical Institution", "Research Institution", "Enterprise"],
+                datasets: [{
+                    label: 'Number of Scholars',
+                    data: [8190, 1454, 419, 359, 98],
+                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '学者所有Institution Category分布',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Number of Scholars: ' + context.parsed.y;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 500
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
