@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Highly Active Authors Trend</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .chart-container {
+            position: relative;
+            height: 500px;
+            margin-top: 20px;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .summary h3 {
+            margin-top: 0;
+            color: #2E86AB;
+        }
+        .stat {
+            display: inline-block;
+            margin-right: 30px;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E86AB;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trend of Highly Active Authors (5-Year Sliding Window)</h1>
+        <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+        </div>
+        <div class="summary">
+            <h3>Summary</h3>
+            <div class="stat">
+                <div class="stat-value">30</div>
+                <div class="stat-label">Number of Periods</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">173</div>
+                <div class="stat-label">Peak Active Authors</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">27.63</div>
+                <div class="stat-label">Average Active Authors</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const trendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1991-1995', '1992-1996', '1993-1997', '1994-1998', '1995-1999', '1996-2000', '1997-2001', '1998-2002', '1999-2003', '2000-2004', '2001-2005', '2002-2006', '2003-2007', '2004-2008', '2005-2009', '2006-2010', '2007-2011', '2008-2012', '2009-2013', '2010-2014', '2011-2015', '2012-2016', '2013-2017', '2014-2018', '2015-2019', '2016-2020', '2017-2021', '2018-2022', '2019-2023', '2020-2024'],
+                datasets: [{
+                    label: 'Highly Active Authors (>=5 articles)',
+                    data: [0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 1, 1, 2, 3, 8, 12, 14, 18, 26, 26, 26, 36, 42, 45, 64, 89, 112, 123, 173],
+                    borderColor: '#2E86AB',
+                    backgroundColor: 'rgba(46, 134, 171, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#2E86AB',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: false
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Period',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Highly Active Authors',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 20
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    </script>
+</body>
+</html>
